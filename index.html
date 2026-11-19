@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Jessica Melani Romero Lora</title>
-<meta name="description" content="Científica de sistemas complejos. IA para detección sistémica de anomalías, visión artificial y process mining.">
+<meta name="description" content="Complex systems scientist. AI for systemic anomaly detection, computer vision and process mining.">
 <style>
   :root {
     --g: #39ff7a;
@@ -18,7 +18,7 @@
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; background: var(--bg); color: var(--txt); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
-  body { overflow-x: hidden; }
+  body { overflow-x: hidden; position: relative; }
 
   /* Capas globales: malla, barrido y viñeta */
   .scanlines, .vineta { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
@@ -31,7 +31,41 @@
 
   canvas#fondo { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; }
 
+  /* Fondo cósmico: planetas, naves y satélites dispersos */
+  #cosmos { position: absolute; left: 0; top: 0; width: 100%; z-index: 1; pointer-events: none; overflow: hidden; }
+  .cosmos-item { position: absolute; }
+  .cosmos-item svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .cosmos-item.flota { animation: flota var(--dur) ease-in-out var(--ret) infinite alternate; }
+  @keyframes flota { from { transform: translateY(-10px); } to { transform: translateY(12px); } }
+
   main { position: relative; z-index: 2; }
+
+  /* Mini astronauta (guía) */
+  #astro { position: absolute; left: 0; top: 0; width: 96px; height: 120px; z-index: 4; pointer-events: none;
+    transition: transform 1.2s cubic-bezier(.45, 0, .2, 1); }
+  #astro .astro-fig { position: absolute; inset: 0; width: 96px; height: 120px; pointer-events: auto; cursor: pointer; overflow: visible;
+    animation: flotaAstro 3.2s ease-in-out infinite; }
+  @keyframes flotaAstro { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+  #astro .brazo-tec { transform-origin: 62px 62px; animation: teclea .5s ease-in-out infinite alternate; }
+  @keyframes teclea { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
+  #astro .scan { animation: barrido-astro 2.2s linear infinite; }
+  @keyframes barrido-astro { from { transform: translateY(-12px); } to { transform: translateY(14px); } }
+  #astro .codigo { animation: codigo 1.4s steps(3) infinite; }
+  @keyframes codigo { 0% { opacity: 1; } 33% { opacity: .3; } 66% { opacity: .7; } 100% { opacity: 1; } }
+  #astro .luz { animation: parpadeo 1s steps(1) infinite; }
+  #astro .flama { opacity: 0; transition: opacity .3s; transform-origin: 28px 86px; }
+  #astro.andando .flama { opacity: 1; animation: llama .12s steps(2) infinite; }
+  @keyframes llama { from { transform: scaleY(.8); } to { transform: scaleY(1.25); } }
+  #astro.andando .pierna-i { animation: paso .4s ease-in-out infinite alternate; transform-origin: 39px 88px; }
+  #astro.andando .pierna-d { animation: paso .4s ease-in-out infinite alternate-reverse; transform-origin: 56px 88px; }
+  @keyframes paso { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
+  #astro.saluda .brazo-atras { animation: saluda .4s ease-in-out 4 alternate; transform-origin: 34px 58px; }
+  @keyframes saluda { from { transform: rotate(0deg); } to { transform: rotate(-55deg); } }
+  #astro .astro-bocadillo { position: absolute; bottom: 128px; left: -30px; min-width: 150px; max-width: 240px; padding: 8px 11px;
+    font: 12px/1.4 var(--mono); color: var(--txt-claro); background: rgba(3,6,3,.94); border: 1px solid var(--g-suave);
+    opacity: 0; transform: translateY(6px); transition: opacity .3s, transform .3s; pointer-events: none; }
+  #astro.b-der .astro-bocadillo { left: auto; right: -30px; }
+  #astro .astro-bocadillo.on { opacity: 1; transform: none; }
 
   /* Hero a pantalla completa */
   .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; padding: 28px 6vw 9vh; }
@@ -42,6 +76,9 @@
   h1 { font-size: clamp(40px, 7vw, 92px); line-height: 1; letter-spacing: -2px; color: var(--txt-claro); margin: 14px 0 18px; font-weight: 700; }
   .rol { font: clamp(14px, 1.6vw, 18px) var(--mono); color: var(--txt); min-height: 1.6em; }
   .rol::after { content: "_"; color: var(--g); animation: parpadeo 1s steps(1) infinite; margin-left: 2px; }
+  .hero-enlaces { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 26px; }
+  .hero-enlaces a { font: 12px var(--mono); color: var(--txt-claro); border: 1px solid var(--g-suave); padding: 9px 14px; text-decoration: none; transition: background .25s, color .25s; }
+  .hero-enlaces a:hover { background: var(--g); color: #000; }
   .scroll-cue { position: absolute; bottom: 28px; left: 6vw; font: 11px var(--mono); letter-spacing: 2.5px; color: var(--g); opacity: 0.6; }
   .scroll-cue span { display: inline-block; animation: bajar 2s ease-in-out infinite; }
   @keyframes bajar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
@@ -81,14 +118,18 @@
   .certs .anio { float: right; font: 12px var(--mono); color: var(--g); }
 
   .chips { display: flex; flex-wrap: wrap; gap: 10px; }
-  .chips span { font: 13px var(--mono); color: var(--txt); border: 1px solid var(--g-suave); padding: 8px 14px; border-radius: 2px; transition: background .25s, color .25s; }
+  .chips span { font: 13px var(--mono); color: var(--txt); border: 1px solid var(--g-suave); padding: 8px 14px; border-radius: 2px; transition: background .25s, color .25s; cursor: default; }
   .chips span:hover { background: var(--g); color: #000; }
+
+  .contacto-botones { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+  .contacto-botones a { font: 13px var(--mono); color: var(--txt-claro); border: 1px solid var(--g-suave); padding: 12px 16px; text-decoration: none; transition: background .25s, color .25s; }
+  .contacto-botones a:hover { background: var(--g); color: #000; }
 
   footer { padding: 10vh 6vw 8vh; border-top: 1px solid var(--g-tenue); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px; align-items: center; }
   footer .frase { font: 14px var(--mono); color: var(--txt); opacity: 0.8; margin: 0; }
+  footer .enlaces { display: flex; gap: 22px; flex-wrap: wrap; }
   footer a { color: var(--g); text-decoration: none; font: 14px var(--mono); border-bottom: 1px solid var(--g-suave); padding-bottom: 2px; }
   footer a:hover { border-color: var(--g); }
-
 
   /* ===== Mapa de capacidades ===== */
   .mapa-sec .mapa-cabecera { display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin:-14px 0 26px; }
@@ -154,127 +195,194 @@
 <body>
 
 <canvas id="fondo" aria-hidden="true"></canvas>
+<div id="cosmos" aria-hidden="true"></div>
 <div class="scanlines" aria-hidden="true"></div>
 <div class="vineta" aria-hidden="true"></div>
 <div class="barrido" aria-hidden="true"></div>
+
+<!-- Mini astronauta: guía que se mueve entre secciones -->
+<div id="astro" aria-live="polite">
+  <div class="astro-bocadillo"></div>
+  <svg class="astro-fig" viewBox="0 0 96 120" role="img" aria-label="Mini astronaut guide. Click to hear a tip.">
+    <defs>
+      <linearGradient id="a-traje" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b3d30"/><stop offset="1" stop-color="#06120c"/></linearGradient>
+      <linearGradient id="a-visor" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5ef2ff" stop-opacity=".35"/><stop offset="1" stop-color="#39ff7a" stop-opacity=".08"/></linearGradient>
+      <clipPath id="a-clip"><circle cx="48" cy="30" r="17"/></clipPath>
+    </defs>
+    <!-- Mochila propulsora y llama -->
+    <rect x="25" y="56" width="8" height="30" rx="3" fill="#10202a" stroke="#c4a1ff" stroke-width=".8"/>
+    <path class="flama" d="M26 86 L29 102 L32 86 Z" fill="#ffc857"/>
+    <!-- Piernas y botas -->
+    <rect class="pierna-i" x="35" y="88" width="9" height="22" rx="3" fill="url(#a-traje)"/>
+    <rect class="pierna-d" x="52" y="88" width="9" height="22" rx="3" fill="url(#a-traje)"/>
+    <rect x="34" y="109" width="11" height="6" rx="2" fill="#03140c" stroke="#5ef2ff" stroke-width=".6"/>
+    <rect x="51" y="109" width="11" height="6" rx="2" fill="#03140c" stroke="#5ef2ff" stroke-width=".6"/>
+    <!-- Torso -->
+    <rect x="32" y="52" width="32" height="38" rx="9" fill="url(#a-traje)" stroke="#5ef2ff" stroke-width="1"/>
+    <circle cx="48" cy="56" r="1.6" fill="#5ef2ff"/>
+    <path d="M36 66 H60" stroke="#5ef2ff" stroke-opacity=".4" stroke-width=".8"/>
+    <!-- Brazo trasero (saludo) -->
+    <path class="brazo-atras" d="M34 58 L24 80" stroke="#1b3d30" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="24" cy="82" r="3" fill="#c98f6b"/>
+    <!-- Computadora con código -->
+    <rect x="30" y="68" width="40" height="26" rx="2" fill="#03140c" stroke="#39ff7a" stroke-width="1"/>
+    <rect x="34" y="72" width="32" height="18" fill="#02100a"/>
+    <rect class="codigo" x="37" y="75" width="14" height="2" fill="#39ff7a"/>
+    <rect class="codigo" x="37" y="79" width="22" height="2" fill="#5ef2ff"/>
+    <rect class="codigo" x="37" y="83" width="10" height="2" fill="#ffc857"/>
+    <path d="M26 94 H74 L70 98 H30 Z" fill="#0b2016" stroke="#39ff7a" stroke-width=".8"/>
+    <!-- Brazos al teclear -->
+    <path d="M34 62 L36 84" stroke="#1b3d30" stroke-width="6" stroke-linecap="round"/>
+    <g class="brazo-tec">
+      <path d="M62 62 L58 84" stroke="#1b3d30" stroke-width="6" stroke-linecap="round"/>
+    </g>
+    <circle cx="36" cy="85" r="2.6" fill="#c98f6b"/>
+    <circle cx="58" cy="85" r="2.6" fill="#c98f6b"/>
+    <!-- Casco con lentes IA -->
+    <rect x="40" y="46" width="16" height="5" rx="2" fill="#0c2a1a"/>
+    <circle cx="48" cy="30" r="18" fill="#061208" fill-opacity=".75" stroke="#39ff7a" stroke-width="1.3"/>
+    <ellipse cx="48" cy="32" rx="10" ry="11" fill="#c98f6b"/>
+    <path d="M38 26 Q48 14 58 26 L56 24 Q48 18 40 24 Z" fill="#1a120c"/>
+    <rect x="38.5" y="29" width="8" height="5" rx="2" fill="rgba(94,242,255,.35)" stroke="#5ef2ff" stroke-width=".9"/>
+    <rect x="49.5" y="29" width="8" height="5" rx="2" fill="rgba(94,242,255,.35)" stroke="#5ef2ff" stroke-width=".9"/>
+    <path d="M46.5 31 H49.5" stroke="#5ef2ff" stroke-width=".9"/>
+    <circle cx="42.5" cy="31.5" r="1" fill="#061208"/>
+    <circle cx="53.5" cy="31.5" r="1" fill="#061208"/>
+    <path d="M44 38 Q48 41 52 38" stroke="#7a3f2a" stroke-width="1" fill="none"/>
+    <g clip-path="url(#a-clip)">
+      <rect class="scan" x="30" y="28" width="36" height="1.4" fill="#5ef2ff" opacity=".8"/>
+    </g>
+    <circle cx="48" cy="30" r="17" fill="url(#a-visor)"/>
+    <!-- Detalles cyborg -->
+    <path d="M63 20 Q69 30 63 40" stroke="#5ef2ff" stroke-width="1.2" fill="none"/>
+    <path d="M58 14 L66 18" stroke="#5ef2ff" stroke-width=".9"/>
+    <circle cx="64" cy="28" r="1.2" fill="#5ef2ff"/>
+    <line x1="48" y1="12" x2="48" y2="5" stroke="#39ff7a" stroke-width="1"/>
+    <circle class="luz" cx="48" cy="4" r="2" fill="#ffc857"/>
+  </svg>
+</div>
 
 <main>
 
   <header class="hero">
     <div class="barra">
-      <span><span class="punto"></span>PERFIL // JMRL-01</span>
-      <span>ESTADO: ACTIVO</span>
+      <span><span class="punto"></span>PROFILE // JMRL-01</span>
+      <span>STATUS: ACTIVE</span>
     </div>
 
     <div class="identidad">
-      <div class="etq">Identidad</div>
+      <div class="etq">Identity</div>
       <h1>Jessica Melani<br>Romero Lora</h1>
       <div class="rol" id="rol"></div>
+      <div class="hero-enlaces">
+        <a href="https://www.linkedin.com/in/jessica-romero-lora/?locale=en-US" target="_blank" rel="noopener">LinkedIn ↗</a>
+        <a href="https://github.com/jessicaromero-ctrl" target="_blank" rel="noopener">GitHub ↗</a>
+      </div>
     </div>
 
-    <div class="scroll-cue"><span>↓</span> DESPLAZA PARA EXPLORAR</div>
+    <div class="scroll-cue"><span>↓</span> SCROLL TO EXPLORE</div>
   </header>
 
 
   <section id="mapa" class="mapa-sec">
-    <div class="titulo revelar"><span class="num">00</span><h2>Mapa de capacidades</h2></div>
+    <div class="titulo revelar"><span class="num">00</span><h2>Capability map</h2></div>
     <div class="mapa-cabecera revelar">
-      <p>Arrastra la esfera o elige un nodo para ver sus cualidades y su repositorio público.</p>
+      <p>Drag the sphere or pick a node to see its skills and public repository.</p>
       <button type="button" class="m-btn sec" id="mapa-auto" aria-pressed="false">AUTO: OFF</button>
     </div>
     <div class="mapa-grid revelar">
       <div class="mapa-stage panel">
-        <canvas id="mapa-canvas" tabindex="0" role="application" aria-label="Esfera interactiva de diez nodos. Usa las flechas para cambiar de nodo y Enter para abrir su repositorio."></canvas>
+        <canvas id="mapa-canvas" tabindex="0" role="application" aria-label="Interactive sphere with ten nodes. Use the arrow keys to change node and Enter to open its repository."></canvas>
         <div class="mapa-leyenda" aria-hidden="true">
-          <span style="--c:rgb(57,255,122)">VISIÓN</span>
+          <span style="--c:rgb(57,255,122)">VISION</span>
           <span style="--c:rgb(94,242,255)">ML</span>
-          <span style="--c:rgb(255,200,87)">DATOS</span>
-          <span style="--c:rgb(196,161,255)">PROTOTIPO</span>
+          <span style="--c:rgb(255,200,87)">DATA</span>
+          <span style="--c:rgb(196,161,255)">PROTOTYPE</span>
         </div>
-        <span class="mapa-pista" aria-hidden="true">ARRASTRA · ← →</span>
+        <span class="mapa-pista" aria-hidden="true">DRAG · ← →</span>
       </div>
       <aside class="mapa-panel panel" id="mapa-panel" aria-live="polite"></aside>
     </div>
-    <div class="mapa-riel revelar" id="mapa-riel" aria-label="Nodos"></div>
+    <div class="mapa-riel revelar" id="mapa-riel" aria-label="Nodes"></div>
   </section>
 
   <section id="sobre-mi">
-    <div class="titulo revelar"><span class="num">01</span><h2>Sobre mí</h2></div>
+    <div class="titulo revelar"><span class="num">01</span><h2>About me</h2></div>
     <div class="panel revelar">
       <p class="lectura">
-        Trabajo en la intersección de la <strong>inteligencia artificial</strong>, la <strong>estadística</strong> y el <strong>análisis de procesos</strong>. Me interesan los sistemas donde las anomalías son sistémicas: aparecen en los datos y en la forma en que los procesos se relacionan entre sí.
+        I work at the intersection of <strong>artificial intelligence</strong>, <strong>statistics</strong> and <strong>process analysis</strong>. I'm interested in systems where anomalies are systemic: they show up in the data and in how processes relate to each other.
       </p>
       <p class="lectura" style="margin-top:20px;">
-        Soy <strong>Data Quality Analyst en Shift Technology</strong>, empresa de InsurTech. Curso la <strong>Maestría en Ingeniería en Inteligencia Artificial</strong> (Big Data) en la Universidad Politécnica Metropolitana de Hidalgo.
+        I'm a <strong>Data Quality Analyst at Shift Technology</strong>, an InsurTech company. I'm pursuing a <strong>Master's in Artificial Intelligence Engineering</strong> (Big Data) at the Universidad Politécnica Metropolitana de Hidalgo.
       </p>
       <p class="lectura" style="margin-top:20px; opacity:.8; font-size:16px;">
-        Criterio de trabajo: ningún resultado se presenta sin intervalo de confianza, prueba estadística y limitaciones explícitas.
+        Working principle: no result is presented without a confidence interval, a statistical test and explicit limitations.
       </p>
     </div>
   </section>
 
   <section id="experiencia">
-    <div class="titulo revelar"><span class="num">02</span><h2>Experiencia</h2></div>
+    <div class="titulo revelar"><span class="num">02</span><h2>Experience</h2></div>
     <ol class="linea-tiempo revelar">
       <li>
-        <div class="periodo">2024 — PRESENTE</div>
+        <div class="periodo">2024 — PRESENT</div>
         <h3>Data Quality Analyst</h3>
-        <p>Shift Technology · InsurTech. Validación y trazabilidad de datos para sistemas de seguros.</p>
+        <p>Shift Technology · InsurTech. Data validation and traceability for insurance systems.</p>
       </li>
       <li>
         <div class="periodo">2022 — 2023</div>
         <h3>Sales Operations Analyst</h3>
-        <p>Aeroméxico. Análisis de ventas para identificar áreas de mejora y optimizar procesos comerciales.</p>
+        <p>Aeroméxico. Sales analysis to identify improvement areas and optimize commercial processes.</p>
       </li>
     </ol>
   </section>
 
   <section id="proyectos">
-    <div class="titulo revelar"><span class="num">03</span><h2>Investigación y proyectos</h2></div>
+    <div class="titulo revelar"><span class="num">03</span><h2>Research & projects</h2></div>
     <div class="grid">
       <article class="tarjeta revelar">
-        <span class="etq">Tesis</span>
-        <h3>Fraude con process mining</h3>
-        <p>Arquitectura de tres capas y métrica FWE para detección de fraude a partir de trayectorias de procesos.</p>
-        <span class="estado">EN DESARROLLO</span>
+        <span class="etq">Thesis</span>
+        <h3>Insurance fraud detection with process mining</h3>
+        <p>Three-layer architecture and the FWE metric for detecting fraud from process trajectories.</p>
+        <span class="estado">IN DEVELOPMENT</span>
       </article>
       <article class="tarjeta revelar">
-        <span class="etq">Visión artificial</span>
-        <h3>Defectos superficiales en acero (NEU)</h3>
-        <p>LBP + SVM frente a ResNet-18, con intervalos de confianza al 95 % y prueba de McNemar.</p>
-        <span class="estado">COMPLETADO</span>
+        <span class="etq">Computer vision</span>
+        <h3>Steel surface defects (NEU)</h3>
+        <p>LBP + SVM vs. ResNet-18, with 95% confidence intervals and McNemar's test.</p>
+        <span class="estado">COMPLETED</span>
       </article>
       <article class="tarjeta revelar">
-        <span class="etq">Visión artificial</span>
-        <h3>Segmentación de hojas de tomate</h3>
-        <p>Pipeline clásico con croma en Lab, umbral de Otsu y análisis de sensibilidad al umbral.</p>
-        <span class="estado">COMPLETADO</span>
+        <span class="etq">Computer vision</span>
+        <h3>Tomato leaf segmentation</h3>
+        <p>Classical pipeline with Lab chroma, Otsu thresholding and threshold sensitivity analysis.</p>
+        <span class="estado">COMPLETED</span>
       </article>
       <article class="tarjeta revelar">
-        <span class="etq">Repositorio</span>
+        <span class="etq">Repository</span>
         <h3>Artificial-Vision-System-s</h3>
-        <p>Prácticas de visión artificial: filtros, detección de baches y defectos en acero, con código reproducible.</p>
-        <span class="estado">EN CURSO</span>
+        <p>Computer vision practices: filters, pothole detection and steel defects, with reproducible code.</p>
+        <span class="estado">IN PROGRESS</span>
       </article>
     </div>
   </section>
 
   <section id="formacion">
-    <div class="titulo revelar"><span class="num">04</span><h2>Formación y certificaciones</h2></div>
+    <div class="titulo revelar"><span class="num">04</span><h2>Education & certifications</h2></div>
     <div class="panel revelar">
-      <p class="etq" style="margin-bottom:18px;">Formación</p>
+      <p class="etq" style="margin-bottom:18px;">Education</p>
       <ul class="certs" style="margin-bottom:34px;">
-        <li><span class="emisor">Universidad Politécnica Metropolitana de Hidalgo</span><div class="nombre-c">Maestría en Ingeniería en IA · Big Data <span class="anio">en curso</span></div></li>
-        <li><span class="emisor">Licenciatura</span><div class="nombre-c">Sociología y Demografía Aplicada</div></li>
+        <li><span class="emisor">Universidad Politécnica Metropolitana de Hidalgo</span><div class="nombre-c">Master's in AI Engineering · Big Data <span class="anio">in progress</span></div></li>
+        <li><span class="emisor">Bachelor's degree</span><div class="nombre-c">Sociology and Applied Demography</div></li>
       </ul>
-      <p class="etq" style="margin-bottom:18px;">Certificaciones</p>
+      <p class="etq" style="margin-bottom:18px;">Certifications</p>
       <ul class="certs">
-        <li><span class="emisor">Tecnológico de Monterrey</span><div class="nombre-c">Ciencia de Datos, alta especialidad <span class="anio">2024</span></div></li>
-        <li><span class="emisor">Tecnológico de Monterrey</span><div class="nombre-c">IoT, alta especialidad <span class="anio">2024</span></div></li>
+        <li><span class="emisor">Tecnológico de Monterrey</span><div class="nombre-c">Data Science, advanced specialization <span class="anio">2024</span></div></li>
+        <li><span class="emisor">Tecnológico de Monterrey</span><div class="nombre-c">IoT, advanced specialization <span class="anio">2024</span></div></li>
         <li><span class="emisor">IBM</span><div class="nombre-c">Enterprise Data Science <span class="anio">2024</span></div></li>
         <li><span class="emisor">Cognitive Class</span><div class="nombre-c">Data Analysis with Python <span class="anio">2024</span></div></li>
         <li><span class="emisor">Centro</span><div class="nombre-c">RAG AI Models Development <span class="anio">2025</span></div></li>
-        <li><span class="emisor">Alura</span><div class="nombre-c">Inmersión IA + Google Gemini <span class="anio">2025</span></div></li>
+        <li><span class="emisor">Alura</span><div class="nombre-c">AI Immersion with Google Gemini <span class="anio">2025</span></div></li>
         <li><span class="emisor">Databricks</span><div class="nombre-c">Fundamentals <span class="anio">2026</span></div></li>
         <li><span class="emisor">Iberoamerican Technology Foundation</span><div class="nombre-c">AI Engineering <span class="anio">2026</span></div></li>
       </ul>
@@ -282,15 +390,29 @@
   </section>
 
   <section id="herramientas">
-    <div class="titulo revelar"><span class="num">05</span><h2>Herramientas</h2></div>
+    <div class="titulo revelar"><span class="num">05</span><h2>Tools</h2></div>
     <div class="chips revelar">
       <span>Python</span><span>OpenCV</span><span>PyTorch</span><span>scikit-learn</span><span>NumPy</span><span>SciPy</span><span>Jupyter</span><span>Git</span>
     </div>
   </section>
 
+  <section id="contacto">
+    <div class="titulo revelar"><span class="num">06</span><h2>Contact</h2></div>
+    <div class="panel revelar">
+      <p class="lectura">Let's talk about data quality, computer vision and process mining.</p>
+      <div class="contacto-botones">
+        <a href="https://www.linkedin.com/in/jessica-romero-lora/?locale=en-US" target="_blank" rel="noopener">LINKEDIN ↗</a>
+        <a href="https://github.com/jessicaromero-ctrl" target="_blank" rel="noopener">GITHUB ↗</a>
+      </div>
+    </div>
+  </section>
+
   <footer>
-    <p class="frase">Visión artificial aplicada · process mining · evaluación estadística de modelos</p>
-    <a href="https://github.com/jessicaromero-ctrl" rel="noopener">github.com/jessicaromero-ctrl →</a>
+    <p class="frase">Applied computer vision · process mining · statistical evaluation of models</p>
+    <div class="enlaces">
+      <a href="https://www.linkedin.com/in/jessica-romero-lora/?locale=en-US" target="_blank" rel="noopener">linkedin.com/in/jessica-romero-lora →</a>
+      <a href="https://github.com/jessicaromero-ctrl" target="_blank" rel="noopener">github.com/jessicaromero-ctrl →</a>
+    </div>
   </footer>
 
 </main>
@@ -300,7 +422,7 @@
   const reducir = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* Escritura del rol */
-  const roles = ["Data Quality Analyst · Shift Technology", "Maestría en IA · UPMH", "Process mining · Visión artificial"];
+  const roles = ["Data Quality Analyst · Shift Technology", "MSc in AI · UPMH", "Process mining · Computer vision"];
   const el = document.getElementById("rol");
   if (reducir) { el.textContent = roles[0]; }
   else {
@@ -405,46 +527,213 @@
   if (reducir) { cuadro(0); } else { bucle(); }
 })();
 
+/* ===== Fondo cósmico aleatorio: planetas, naves, satélites y cometas ===== */
+(() => {
+  const cont = document.getElementById("cosmos");
+  const reducir = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const paleta = ["#39ff7a", "#5ef2ff", "#ffc857", "#c4a1ff", "#8400e0", "#eafff0"];
+  const dims = { planeta: [90, 140], anillado: [120, 160], nave: [56, 76], satelite: [56, 70], cometa: [150, 190], luna: [50, 80], nebulosa: [280, 360] };
+  const tipos = Object.keys(dims);
+  let gid = 0;
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
+
+  const svgDe = (tipo, c, c2) => {
+    const id = "cg" + (++gid);
+    switch (tipo) {
+      case "planeta":
+        return `<svg viewBox="0 0 100 100"><defs><radialGradient id="${id}" cx="35%" cy="35%" r="70%"><stop offset="0" stop-color="${c}"/><stop offset="1" stop-color="#030603"/></radialGradient></defs><circle cx="50" cy="50" r="46" fill="url(#${id})"/><circle cx="50" cy="50" r="46" fill="none" stroke="${c}" stroke-opacity=".35"/></svg>`;
+      case "anillado":
+        return `<svg viewBox="0 0 120 100"><defs><radialGradient id="${id}" cx="35%" cy="35%" r="70%"><stop offset="0" stop-color="${c}"/><stop offset="1" stop-color="#030603"/></radialGradient></defs><circle cx="60" cy="50" r="30" fill="url(#${id})"/><ellipse cx="60" cy="50" rx="58" ry="13" fill="none" stroke="${c2}" stroke-width="1.6" stroke-opacity=".7" transform="rotate(-14 60 50)"/></svg>`;
+      case "nave":
+        return `<svg viewBox="0 0 80 40"><path d="M2 20 L-8 16 L-8 24 Z" fill="#ffc857" opacity=".7"/><path d="M4 20 L56 12 L76 20 L56 28 Z" fill="#06120c" stroke="${c}" stroke-width="1.2"/><path d="M30 20 L44 16 L44 24 Z" fill="${c}" fill-opacity=".45"/><circle cx="60" cy="20" r="1.8" fill="#ffc857"/></svg>`;
+      case "satelite":
+        return `<svg viewBox="0 0 100 60"><rect x="0" y="22" width="30" height="16" fill="#06120c" stroke="${c}"/><rect x="70" y="22" width="30" height="16" fill="#06120c" stroke="${c}"/><rect x="40" y="18" width="20" height="24" rx="3" fill="#0a1a12" stroke="${c}"/><line x1="30" y1="30" x2="40" y2="30" stroke="${c}"/><line x1="60" y1="30" x2="70" y2="30" stroke="${c}"/><circle cx="50" cy="30" r="3" fill="${c}"/></svg>`;
+      case "cometa":
+        return `<svg viewBox="0 0 160 40"><defs><linearGradient id="${id}" x1="0" x2="1"><stop offset="0" stop-color="${c}" stop-opacity="0"/><stop offset="1" stop-color="${c}"/></linearGradient></defs><path d="M0 22 L140 18 L140 22 Z" fill="url(#${id})"/><circle cx="144" cy="20" r="3" fill="#eafff0"/></svg>`;
+      case "luna":
+        return `<svg viewBox="0 0 100 100"><defs><radialGradient id="${id}" cx="35%" cy="35%" r="70%"><stop offset="0" stop-color="${c}" stop-opacity=".9"/><stop offset="1" stop-color="#030603"/></radialGradient></defs><circle cx="50" cy="50" r="44" fill="url(#${id})"/><circle cx="36" cy="40" r="7" fill="#030603" fill-opacity=".35"/><circle cx="62" cy="62" r="5" fill="#030603" fill-opacity=".35"/><circle cx="58" cy="34" r="3" fill="#030603" fill-opacity=".3"/></svg>`;
+      default:
+        return `<svg viewBox="0 0 200 200"><defs><radialGradient id="${id}"><stop offset="0" stop-color="${c}" stop-opacity=".55"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></radialGradient></defs><circle cx="100" cy="100" r="100" fill="url(#${id})"/></svg>`;
+    }
+  };
+
+  const construir = () => {
+    cont.innerHTML = "";
+    const W = document.documentElement.clientWidth;
+    const H = document.documentElement.scrollHeight;
+    cont.style.height = H + "px";
+    const pequeno = W < 700;
+    const n = Math.min(14, Math.max(6, Math.round(H / 1100)));
+    const banda = H / n;
+    for (let i = 0; i < n; i++) {
+      const tipo = pick(tipos);
+      const c = pick(paleta);
+      const c2 = pick(paleta.filter((x) => x !== c));
+      const [a, b] = dims[tipo];
+      const w = (a + Math.random() * (b - a)) * (pequeno ? 0.6 : 1);
+      const izquierda = i % 2 === 0;
+      const x = izquierda ? -w * 0.35 + Math.random() * w * 0.25 : W - w * 0.65 - Math.random() * w * 0.25;
+      const y = i * banda + banda * (0.15 + Math.random() * 0.6);
+      const opacidad = tipo === "nebulosa" ? 0.3 + Math.random() * 0.15 : 0.4 + Math.random() * 0.4;
+      const el = document.createElement("div");
+      el.className = "cosmos-item" + (reducir ? "" : " flota");
+      el.style.cssText = `left:${x.toFixed(0)}px; top:${y.toFixed(0)}px; width:${w.toFixed(0)}px; opacity:${opacidad.toFixed(2)}; --dur:${(7 + Math.random() * 5).toFixed(1)}s; --ret:${(-Math.random() * 6).toFixed(1)}s;`;
+      el.innerHTML = svgDe(tipo, c, c2);
+      cont.appendChild(el);
+    }
+  };
+
+  construir();
+  let t;
+  window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(construir, 250); });
+})();
+
+/* ===== Mini astronauta: guía y reacciones ===== */
+(() => {
+  const reducir = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const astro = document.getElementById("astro");
+  const bocadillo = astro.querySelector(".astro-bocadillo");
+  const figura = astro.querySelector(".astro-fig");
+  let moverT = null, decirT = null, ticking = false, actual = null, enTarjeta = false;
+
+  const ruta = [
+    { el: document.querySelector("header.hero"), sel: "h1", frase: "Hi, I'm Mel's guide. Scroll to explore." },
+    { el: document.getElementById("mapa"), sel: ".mapa-stage", frase: "Pick a node to scan it.", dx: 0.55 },
+    { el: document.getElementById("sobre-mi"), sel: ".panel", frase: "Statistics first, claims second." },
+    { el: document.getElementById("experiencia"), sel: ".linea-tiempo", frase: "Data quality is where it starts." },
+    { el: document.getElementById("proyectos"), sel: ".grid", frase: "Hover a project to inspect it." },
+    { el: document.getElementById("formacion"), sel: ".panel", frase: "Eight certifications and counting." },
+    { el: document.getElementById("herramientas"), sel: ".chips", frase: "Hover a tool to inspect it." },
+    { el: document.getElementById("contacto"), sel: ".panel", frase: "Let's connect on LinkedIn." }
+  ];
+  const frasesClic = ["Beep. Data never lies, but it can mislead.", "Scanning the next section...", "Glasses on. Metrics ready.", "Care for a confidence interval?", "Zero-gravity, full-rigor."];
+
+  const decir = (texto, ms = 3200) => {
+    bocadillo.textContent = texto;
+    bocadillo.classList.add("on");
+    clearTimeout(decirT);
+    decirT = setTimeout(() => bocadillo.classList.remove("on"), ms);
+  };
+
+  const colocar = (el, dx = 0.78) => {
+    const r = el.getBoundingClientRect();
+    const anchoDoc = document.documentElement.clientWidth;
+    let x = r.left + window.scrollX + r.width * dx - 48;
+    x = Math.max(8, Math.min(x, anchoDoc - 104));
+    const y = r.top + window.scrollY - 112;
+    astro.classList.add("andando");
+    clearTimeout(moverT);
+    moverT = setTimeout(() => astro.classList.remove("andando"), 1100);
+    astro.classList.toggle("b-der", x > anchoDoc / 2);
+    astro.style.transform = `translate(${x.toFixed(0)}px, ${y.toFixed(0)}px)`;
+  };
+
+  const actualDe = () => {
+    const mitad = window.innerHeight * 0.45;
+    let cur = ruta[0];
+    for (const it of ruta) { if (it.el && it.el.getBoundingClientRect().top <= mitad) cur = it; }
+    return cur;
+  };
+  const destinoDe = (it) => it.el.querySelector(it.sel) || it.el;
+
+  const actualizar = () => {
+    const it = actualDe();
+    if (it === actual) return;
+    actual = it;
+    if (!enTarjeta) {
+      colocar(destinoDe(it), it.dx || 0.78);
+      decir(it.frase);
+    }
+  };
+
+  window.addEventListener("scroll", () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { actualizar(); ticking = false; });
+  }, { passive: true });
+
+  /* Interacción con proyectos: se coloca sobre la tarjeta */
+  document.querySelectorAll("#proyectos .tarjeta").forEach((card) => {
+    card.addEventListener("mouseenter", () => {
+      enTarjeta = true;
+      colocar(card, 0.5);
+      decir("Inspecting: " + card.querySelector("h3").textContent, 2600);
+    });
+    card.addEventListener("mouseleave", () => {
+      enTarjeta = false;
+      if (actual) colocar(destinoDe(actual), actual.dx || 0.78);
+    });
+  });
+
+  /* Herramientas: el astronauta lee el nombre de cada una */
+  document.querySelectorAll("#herramientas .chips span").forEach((chip) => {
+    chip.addEventListener("mouseenter", () => decir("Tool: " + chip.textContent, 1800));
+  });
+
+  /* El mapa avisa qué nodo se escanea */
+  window.addEventListener("mapa:seleccion", (e) => decir("Scanning: " + e.detail, 2800));
+
+  /* Clic en el astronauta: saludo y consejo */
+  figura.addEventListener("click", () => {
+    astro.classList.remove("saluda");
+    void astro.offsetWidth;
+    astro.classList.add("saluda");
+    setTimeout(() => astro.classList.remove("saluda"), 1800);
+    decir(frasesClic[Math.floor(Math.random() * frasesClic.length)], 3000);
+  });
+
+  window.addEventListener("resize", () => {
+    if (actual) colocar(destinoDe(actual), actual.dx || 0.78);
+  });
+
+  window.addEventListener("load", () => {
+    actual = null;
+    actualizar();
+    if (reducir) astro.style.transition = "none";
+  });
+  setTimeout(() => { actualizar(); }, 300);
+})();
+
   /* ===== Mapa de capacidades ===== */
   (() => {
     const G = "https://github.com/jessicaromero-ctrl/";
     const CAT = {
-      vision: { rgb: "57,255,122", etiqueta: "VISIÓN ARTIFICIAL" },
+      vision: { rgb: "57,255,122", etiqueta: "COMPUTER VISION" },
       ml:     { rgb: "94,242,255", etiqueta: "MACHINE LEARNING" },
-      datos:  { rgb: "255,200,87", etiqueta: "DATOS" },
-      proto:  { rgb: "196,161,255", etiqueta: "PROTOTIPO" }
+      datos:  { rgb: "255,200,87", etiqueta: "DATA" },
+      proto:  { rgb: "196,161,255", etiqueta: "PROTOTYPE" }
     };
     const NODOS = [
-      { corto: "Supervisado", nombre: "Aprendizaje supervisado", cat: "ml", nivel: "MODELADO",
-        cuali: ["Clasificación y regresión con validación cruzada", "Comparación de modelos con métricas explícitas", "Código reproducible en Python"],
-        repo: { nombre: "Supervised-Learning", url: G + "Supervised-Learning", desc: "Métodos supervisados: modelos, métricas y comparación.", estado: null } },
-      { corto: "No supervisado", nombre: "Aprendizaje no supervisado", cat: "ml", nivel: "MODELADO",
-        cuali: ["Agrupamiento y reducción de dimensionalidad", "Representación de datos sin etiquetas", "Interpretación de los grupos encontrados"],
-        repo: { nombre: "Unsupervised-Learning", url: G + "Unsupervised-Learning", desc: "Métodos no supervisados: agrupamiento y representación.", estado: null } },
-      { corto: "Estadística", nombre: "Estadística aplicada a IA", cat: "ml", nivel: "EVALUACIÓN",
-        cuali: ["Inferencia y pruebas de hipótesis", "Intervalos de confianza y tamaño del efecto", "Diseño de experimentos reproducibles"],
-        repo: { nombre: "Applied-Statistics-for-Artificial-Intelligence-Engineering", url: G + "Applied-Statistics-for-Artificial-Intelligence-Engineering", desc: "Fundamentos estadísticos para ingeniería de IA.", estado: null } },
-      { corto: "EDA", nombre: "Análisis exploratorio de datos", cat: "datos", nivel: "EXPLORACIÓN",
-        cuali: ["Limpieza y validación de datos", "Visualización para detectar patrones y anomalías", "Hallazgos documentados antes del modelado"],
-        repo: { nombre: "EDA", url: G + "EDA", desc: "Análisis exploratorio de datos.", estado: null } },
-      { corto: "Matemáticas", nombre: "Matemáticas para ML", cat: "ml", nivel: "FUNDAMENTOS",
-        cuali: ["Álgebra lineal aplicada a modelos", "Optimización y gradientes", "Relación entre teoría e implementación"],
-        repo: { nombre: "Advanced-Math-for-ML", url: G + "Advanced-Math-for-ML", desc: "Fundamentos matemáticos del aprendizaje automático.", estado: null } },
-      { corto: "Big Data", nombre: "Big Data aplicado", cat: "datos", nivel: "INGENIERÍA DE DATOS",
-        cuali: ["Procesamiento de grandes volúmenes de datos", "Pipelines de datos escalables", "Herramientas de procesamiento distribuido"],
-        repo: { nombre: "Big-Data-Applications", url: G + "Big-Data-Applications", desc: "Aplicaciones de procesamiento de grandes volúmenes de datos.", estado: null } },
-      { corto: "PLN", nombre: "Procesamiento de lenguaje natural", cat: "ml", nivel: "NLP",
-        cuali: ["Representación de texto", "Clasificación de textos", "Evaluación de modelos de lenguaje"],
-        repo: { nombre: "procesamiento-lenguaje-natural", url: G + "procesamiento-lenguaje-natural", desc: "Repositorio del curso de procesamiento de lenguaje natural.", estado: null } },
+      { corto: "Supervised", nombre: "Supervised learning", cat: "ml", nivel: "MODELING",
+        cuali: ["Classification and regression with cross-validation", "Model comparison with explicit metrics", "Reproducible code in Python"],
+        repo: { nombre: "Supervised-Learning", url: G + "Supervised-Learning", desc: "Supervised methods: models, metrics and comparison.", estado: null } },
+      { corto: "Unsupervised", nombre: "Unsupervised learning", cat: "ml", nivel: "MODELING",
+        cuali: ["Clustering and dimensionality reduction", "Representation learning from unlabeled data", "Interpretation of the groups found"],
+        repo: { nombre: "Unsupervised-Learning", url: G + "Unsupervised-Learning", desc: "Unsupervised methods: clustering and representation.", estado: null } },
+      { corto: "Statistics", nombre: "Statistics for AI", cat: "ml", nivel: "EVALUATION",
+        cuali: ["Inference and hypothesis testing", "Confidence intervals and effect size", "Reproducible experiment design"],
+        repo: { nombre: "Applied-Statistics-for-Artificial-Intelligence-Engineering", url: G + "Applied-Statistics-for-Artificial-Intelligence-Engineering", desc: "Statistical foundations for AI engineering.", estado: null } },
+      { corto: "EDA", nombre: "Exploratory data analysis", cat: "datos", nivel: "EXPLORATION",
+        cuali: ["Data cleaning and validation", "Visualization to detect patterns and anomalies", "Findings documented before modeling"],
+        repo: { nombre: "EDA", url: G + "EDA", desc: "Exploratory data analysis.", estado: null } },
+      { corto: "Math", nombre: "Math for ML", cat: "ml", nivel: "FOUNDATIONS",
+        cuali: ["Linear algebra applied to models", "Optimization and gradients", "Links between theory and implementation"],
+        repo: { nombre: "Advanced-Math-for-ML", url: G + "Advanced-Math-for-ML", desc: "Mathematical foundations of machine learning.", estado: null } },
+      { corto: "Big Data", nombre: "Applied big data", cat: "datos", nivel: "DATA ENGINEERING",
+        cuali: ["Processing of large data volumes", "Scalable data pipelines", "Distributed processing tools"],
+        repo: { nombre: "Big-Data-Applications", url: G + "Big-Data-Applications", desc: "Large-scale data processing applications.", estado: null } },
+      { corto: "NLP", nombre: "Natural language processing", cat: "ml", nivel: "NLP",
+        cuali: ["Text representation", "Text classification", "Evaluation of language models"],
+        repo: { nombre: "procesamiento-lenguaje-natural", url: G + "procesamiento-lenguaje-natural", desc: "Natural language processing course repository.", estado: null } },
       { corto: "MexNLP-911", nombre: "MexNLP-911", cat: "proto", nivel: "HACKATHON",
-        cuali: ["Clasificación de llamadas de emergencia en español coloquial", "API con FastAPI e interfaz en Streamlit", "README técnico con mapeo a productos IBM"],
-        repo: { nombre: "Hackaton-Concienc.ia-2026", url: G + "Hackaton-Concienc.ia-2026", desc: "Prototipo de NLP para Concienc.ia Hackathon 2026.", estado: "PROTOTIPO" } },
-      { corto: "NEU", nombre: "Defectos en acero (NEU)", cat: "vision", nivel: "ML · VISIÓN",
-        cuali: ["Baseline LBP + SVM frente a ResNet-18", "Intervalos de confianza por bootstrap", "Prueba de McNemar y verificación de fuga de datos"],
-        repo: { nombre: "Artificial-Vision-System-s / 04-defectos-neu", url: G + "Artificial-Vision-System-s/tree/main/04-defectos-neu", desc: "Comparación clásico vs. CNN con validación estadística.", estado: "COMPLETADO" } },
-      { corto: "Hojas", nombre: "Segmentación de hojas", cat: "vision", nivel: "PDI",
-        cuali: ["Croma en Lab como canal de segmentación", "Umbral de Otsu y morfología matemática", "Análisis de sensibilidad al umbral"],
-        repo: { nombre: "Artificial-Vision-System-s / 05-segmentacion-hojas", url: G + "Artificial-Vision-System-s/tree/main/05-segmentacion-hojas", desc: "Segmentación de hojas de tomate con PDI clásico.", estado: "COMPLETADO" } }
+        cuali: ["Classification of emergency calls in colloquial Mexican Spanish", "API with FastAPI and Streamlit interface", "Technical README mapped to IBM products"],
+        repo: { nombre: "Hackaton-Concienc.ia-2026", url: G + "Hackaton-Concienc.ia-2026", desc: "NLP prototype for the Concienc.ia Hackathon 2026.", estado: "PROTOTYPE" } },
+      { corto: "NEU", nombre: "Steel surface defects (NEU)", cat: "vision", nivel: "ML · VISION",
+        cuali: ["LBP + SVM baseline vs. ResNet-18", "Bootstrap confidence intervals", "McNemar test and data-leakage check"],
+        repo: { nombre: "Artificial-Vision-System-s / 04-defectos-neu", url: G + "Artificial-Vision-System-s/tree/main/04-defectos-neu", desc: "Classical vs. CNN comparison with statistical validation.", estado: "COMPLETED" } },
+      { corto: "Leaves", nombre: "Leaf segmentation", cat: "vision", nivel: "IMAGE PROCESSING",
+        cuali: ["Lab chroma as segmentation channel", "Otsu thresholding and mathematical morphology", "Threshold sensitivity analysis"],
+        repo: { nombre: "Artificial-Vision-System-s / 05-segmentacion-hojas", url: G + "Artificial-Vision-System-s/tree/main/05-segmentacion-hojas", desc: "Tomato leaf segmentation with classical image processing.", estado: "COMPLETED" } }
     ];
     const ARISTAS = [];
     NODOS.forEach((a, i) => NODOS.forEach((b, j) => { if (j > i && a.cat === b.cat) ARISTAS.push([i, j]); }));
@@ -460,7 +749,7 @@
     let rx = -0.25, ry = 0, inercia = 0;
     let arrastrando = false, ultimo = null, movido = 0;
     let sel = 0, sobre = -1, objetivo = null, auto = false, ultimoAuto = 0;
-    let pn = [];
+    let pn = [], listo = false;
 
     const PHI = Math.PI * (3 - Math.sqrt(5));
     const esfera = (n) => Array.from({ length: n }, (_, i) => {
@@ -571,16 +860,17 @@
         <div class="m-eyebrow">${String(i + 1).padStart(2, "0")} / ${String(N).padStart(2, "0")} · ${c.etiqueta} · ${n.nivel}</div>
         <h3 class="m-titulo">${n.nombre}</h3>
         <div class="m-code"><span class="k">repo</span>${repo.nombre}
-<span class="k">acceso</span>PÚBLICO${repo.estado ? ` · <em>${repo.estado}</em>` : ""}
-<span class="k">nota</span>${repo.desc}</div>
+<span class="k">access</span>PUBLIC${repo.estado ? ` · <em>${repo.estado}</em>` : ""}
+<span class="k">note</span>${repo.desc}</div>
         <ol class="m-q">${n.cuali.map((q, k) => `<li><b>${String(k + 1).padStart(2, "0")}</b><span>${q}</span></li>`).join("")}</ol>
         <div class="m-cta">
-          <a class="m-btn" href="${repo.url}" target="_blank" rel="noopener">ABRIR REPOSITORIO ↗</a>
-          <button type="button" class="m-btn sec" data-sig>SIGUIENTE →</button>
+          <a class="m-btn" href="${repo.url}" target="_blank" rel="noopener">OPEN REPOSITORY ↗</a>
+          <button type="button" class="m-btn sec" data-sig>NEXT →</button>
         </div>`;
       panel.classList.add("entrar");
       panel.querySelector("[data-sig]").addEventListener("click", () => mostrar((sel + 1) % N));
       [...riel.children].forEach((b, k) => b.setAttribute("aria-pressed", k === i ? "true" : "false"));
+      if (listo) window.dispatchEvent(new CustomEvent("mapa:seleccion", { detail: n.nombre }));
     };
 
     NODOS.forEach((n, i) => {
@@ -665,6 +955,7 @@
     window.addEventListener("resize", ajustar);
     ajustar();
     mostrar(0);
+    listo = true;
     requestAnimationFrame(bucle);
   })();
 </script>
