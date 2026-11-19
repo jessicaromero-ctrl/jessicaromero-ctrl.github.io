@@ -89,6 +89,38 @@
   footer a { color: var(--g); text-decoration: none; font: 14px var(--mono); border-bottom: 1px solid var(--g-suave); padding-bottom: 2px; }
   footer a:hover { border-color: var(--g); }
 
+
+  /* ===== Mapa de capacidades ===== */
+  .mapa-sec .intro { font: 14px var(--mono); color: var(--txt); opacity: .8; margin: -18px 0 28px; }
+  .mapa-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 24px; align-items: stretch; }
+  .mapa-lienzo { position: relative; border: 1px solid var(--g-suave); border-radius: 4px; background: rgba(3,6,3,.6); overflow: hidden; min-height: 480px; }
+  .mapa-lienzo canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+  .mapa-lienzo canvas.arrastrando { cursor: grabbing; }
+  .mapa-lienzo .pista { position: absolute; left: 14px; bottom: 12px; font: 11px var(--mono); letter-spacing: 2px; color: var(--g); opacity: .55; pointer-events: none; }
+  .mapa-panel { min-height: 480px; display: flex; flex-direction: column; }
+  .mapa-panel h3 { margin: 6px 0 4px; font-size: 26px; color: var(--txt-claro); font-weight: 600; letter-spacing: -.3px; }
+  .mapa-panel .nivel { font: 11px var(--mono); letter-spacing: 2px; color: var(--g); opacity: .8; }
+  .mapa-panel ul.cualidades { list-style: none; padding: 0; margin: 18px 0 22px; }
+  .mapa-panel ul.cualidades li { color: var(--txt); padding: 7px 0 7px 22px; position: relative; border-bottom: 1px solid var(--g-tenue); line-height: 1.45; font-size: 15px; }
+  .mapa-panel ul.cualidades li::before { content: "—"; position: absolute; left: 0; color: var(--g); }
+  .mapa-panel .etq-sec { font: 11px var(--mono); letter-spacing: 2.5px; color: var(--g); opacity: .6; margin-bottom: 10px; }
+  .proyecto { display: block; text-decoration: none; border: 1px solid var(--g-suave); padding: 14px 16px; margin-bottom: 10px; border-radius: 3px; transition: border-color .25s, background .25s; }
+  .proyecto:hover { border-color: var(--g); background: rgba(57,255,122,.05); }
+  .proyecto .pn { color: var(--txt-claro); font-size: 16px; font-weight: 600; }
+  .proyecto .pd { color: var(--txt); opacity: .8; font-size: 14px; margin-top: 4px; line-height: 1.4; }
+  .proyecto .pe { float: right; font: 10px var(--mono); letter-spacing: 1.5px; color: var(--g); border: 1px solid var(--g-suave); padding: 3px 7px; margin-top: 2px; }
+  .proyecto.pendiente { cursor: default; opacity: .7; }
+  .proyecto.pendiente:hover { border-color: var(--g-suave); background: transparent; }
+  .mapa-botones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+  .mapa-botones button { font: 13px var(--mono); color: var(--txt); background: transparent; border: 1px solid var(--g-suave); padding: 9px 14px; cursor: pointer; border-radius: 2px; transition: background .25s, color .25s, border-color .25s; }
+  .mapa-botones button:hover, .mapa-botones button[aria-pressed="true"] { background: var(--g); color: #000; border-color: var(--g); }
+  .mapa-botones button:focus-visible { outline: 2px solid var(--g); outline-offset: 3px; }
+  @media (max-width: 900px) {
+    .mapa-grid { grid-template-columns: 1fr; }
+    .mapa-lienzo { min-height: 380px; }
+    .mapa-panel { min-height: 0; }
+  }
+
   /* Revelado al hacer scroll */
   .revelar { opacity: 0; transform: translateY(18px); transition: opacity .9s ease, transform .9s ease; }
   .revelar.visible { opacity: 1; transform: none; }
@@ -128,6 +160,20 @@
 
     <div class="scroll-cue"><span>↓</span> DESPLAZA PARA EXPLORAR</div>
   </header>
+
+
+  <section id="mapa" class="mapa-sec">
+    <div class="titulo revelar"><span class="num">00</span><h2>Mapa de capacidades</h2></div>
+    <p class="intro revelar">Selecciona un nodo para explorar cualidades y proyectos.</p>
+    <div class="mapa-grid revelar">
+      <div class="mapa-lienzo">
+        <canvas id="mapa-canvas" role="img" aria-label="Esfera interactiva con seis capacidades. Arrastra para girar; selecciona un nodo para ver sus proyectos."></canvas>
+        <span class="pista">ARRASTRA PARA GIRAR</span>
+      </div>
+      <aside class="mapa-panel panel" id="mapa-panel" aria-live="polite"></aside>
+    </div>
+    <nav class="mapa-botones revelar" id="mapa-botones" aria-label="Capacidades"></nav>
+  </section>
 
   <section id="sobre-mi">
     <div class="titulo revelar"><span class="num">01</span><h2>Sobre mí</h2></div>
@@ -335,6 +381,682 @@
   window.addEventListener("resize", preparar);
   if (reducir) { cuadro(0); } else { bucle(); }
 })();
+
+  /* ===== Mapa de capacidades: datos editables ===== */
+  const REPO_VISION = "https://github.com/jessicaromero-ctrl/Artificial-Vision-System-s";
+  const capacidades = [
+    {
+      id: "supervisado", nombre: "Aprendizaje supervisado", nivel: "ML · MODELADO",
+      cualidades: [
+        "C",
+        "l",
+        "a",
+        "s",
+        "i",
+        "f",
+        "i",
+        "c",
+        "a",
+        "c",
+        "i",
+        "ó",
+        "n",
+        " ",
+        "y",
+        " ",
+        "r",
+        "e",
+        "g",
+        "r",
+        "e",
+        "s",
+        "i",
+        "ó",
+        "n",
+        " ",
+        "c",
+        "o",
+        "n",
+        " ",
+        "v",
+        "a",
+        "l",
+        "i",
+        "d",
+        "a",
+        "c",
+        "i",
+        "ó",
+        "n",
+        " ",
+        "c",
+        "r",
+        "u",
+        "z",
+        "a",
+        "d",
+        "a"
+      ],
+      proyectos: [{ nombre: "Supervised-Learning", desc: "Repositorio de métodos supervisados: modelos, métricas y comparación.", url: "https://github.com/jessicaromero-ctrl/Supervised-Learning", estado: "PÚBLICO" }]
+    },
+    {
+      id: "no-supervisado", nombre: "Aprendizaje no supervisado", nivel: "ML · MODELADO",
+      cualidades: [
+        "A",
+        "g",
+        "r",
+        "u",
+        "p",
+        "a",
+        "m",
+        "i",
+        "e",
+        "n",
+        "t",
+        "o",
+        " ",
+        "y",
+        " ",
+        "r",
+        "e",
+        "d",
+        "u",
+        "c",
+        "c",
+        "i",
+        "ó",
+        "n",
+        " ",
+        "d",
+        "e",
+        " ",
+        "d",
+        "i",
+        "m",
+        "e",
+        "n",
+        "s",
+        "i",
+        "o",
+        "n",
+        "a",
+        "l",
+        "i",
+        "d",
+        "a",
+        "d"
+      ],
+      proyectos: [{ nombre: "Unsupervised-Learning", desc: "Repositorio de métodos no supervisados: agrupamiento y representación de datos.", url: "https://github.com/jessicaromero-ctrl/Unsupervised-Learning", estado: "PÚBLICO" }]
+    },
+    {
+      id: "estadistica", nombre: "Estadística aplicada a IA", nivel: "ML · EVALUACIÓN",
+      cualidades: [
+        "I",
+        "n",
+        "f",
+        "e",
+        "r",
+        "e",
+        "n",
+        "c",
+        "i",
+        "a",
+        " ",
+        "y",
+        " ",
+        "p",
+        "r",
+        "u",
+        "e",
+        "b",
+        "a",
+        "s",
+        " ",
+        "d",
+        "e",
+        " ",
+        "h",
+        "i",
+        "p",
+        "ó",
+        "t",
+        "e",
+        "s",
+        "i",
+        "s"
+      ],
+      proyectos: [{ nombre: "Applied-Statistics-for-AI-Engineering", desc: "Fundamentos estadísticos aplicados a ingeniería de IA.", url: "https://github.com/jessicaromero-ctrl/Applied-Statistics-for-Artificial-Intelligence-Engineering", estado: "PÚBLICO" }]
+    },
+    {
+      id: "eda", nombre: "Análisis exploratorio de datos", nivel: "DATA SCIENCE · EDA",
+      cualidades: [
+        "L",
+        "i",
+        "m",
+        "p",
+        "i",
+        "e",
+        "z",
+        "a",
+        ",",
+        " ",
+        "v",
+        "i",
+        "s",
+        "u",
+        "a",
+        "l",
+        "i",
+        "z",
+        "a",
+        "c",
+        "i",
+        "ó",
+        "n",
+        " ",
+        "y",
+        " ",
+        "d",
+        "e",
+        "t",
+        "e",
+        "c",
+        "c",
+        "i",
+        "ó",
+        "n",
+        " ",
+        "d",
+        "e",
+        " ",
+        "p",
+        "a",
+        "t",
+        "r",
+        "o",
+        "n",
+        "e",
+        "s"
+      ],
+      proyectos: [{ nombre: "EDA", desc: "Repositorio de análisis exploratorio de datos.", url: "https://github.com/jessicaromero-ctrl/EDA", estado: "PÚBLICO" }]
+    },
+    {
+      id: "matematicas", nombre: "Matemáticas para ML", nivel: "ML · FUNDAMENTOS",
+      cualidades: [
+        "Á",
+        "l",
+        "g",
+        "e",
+        "b",
+        "r",
+        "a",
+        " ",
+        "l",
+        "i",
+        "n",
+        "e",
+        "a",
+        "l",
+        " ",
+        "y",
+        " ",
+        "o",
+        "p",
+        "t",
+        "i",
+        "m",
+        "i",
+        "z",
+        "a",
+        "c",
+        "i",
+        "ó",
+        "n",
+        " ",
+        "a",
+        "p",
+        "l",
+        "i",
+        "c",
+        "a",
+        "d",
+        "a",
+        "s",
+        " ",
+        "a",
+        " ",
+        "m",
+        "o",
+        "d",
+        "e",
+        "l",
+        "o",
+        "s"
+      ],
+      proyectos: [{ nombre: "Advanced-Math-for-ML", desc: "Fundamentos matemáticos del aprendizaje automático.", url: "https://github.com/jessicaromero-ctrl/Advanced-Math-for-ML", estado: "PÚBLICO" }]
+    },
+    {
+      id: "big-data", nombre: "Big Data aplicado", nivel: "DATA ENGINEERING",
+      cualidades: [
+        "P",
+        "r",
+        "o",
+        "c",
+        "e",
+        "s",
+        "a",
+        "m",
+        "i",
+        "e",
+        "n",
+        "t",
+        "o",
+        " ",
+        "d",
+        "e",
+        " ",
+        "d",
+        "a",
+        "t",
+        "o",
+        "s",
+        " ",
+        "a",
+        " ",
+        "g",
+        "r",
+        "a",
+        "n",
+        " ",
+        "e",
+        "s",
+        "c",
+        "a",
+        "l",
+        "a"
+      ],
+      proyectos: [{ nombre: "Big-Data-Applications", desc: "Aplicaciones de procesamiento de grandes volúmenes de datos.", url: "https://github.com/jessicaromero-ctrl/Big-Data-Applications", estado: "PÚBLICO" }]
+    },
+    {
+      id: "pln", nombre: "Procesamiento de lenguaje natural", nivel: "ML · NLP",
+      cualidades: [
+        "R",
+        "e",
+        "p",
+        "r",
+        "e",
+        "s",
+        "e",
+        "n",
+        "t",
+        "a",
+        "c",
+        "i",
+        "ó",
+        "n",
+        " ",
+        "d",
+        "e",
+        " ",
+        "t",
+        "e",
+        "x",
+        "t",
+        "o",
+        " ",
+        "y",
+        " ",
+        "c",
+        "l",
+        "a",
+        "s",
+        "i",
+        "f",
+        "i",
+        "c",
+        "a",
+        "c",
+        "i",
+        "ó",
+        "n"
+      ],
+      proyectos: [{ nombre: "procesamiento-lenguaje-natural", desc: "Repositorio del curso de procesamiento de lenguaje natural.", url: "https://github.com/jessicaromero-ctrl/procesamiento-lenguaje-natural", estado: "PÚBLICO" }]
+    },
+    {
+      id: "hackathon", nombre: "MexNLP-911", nivel: "PROTOTIPO · NLP",
+      cualidades: [
+        "C",
+        "l",
+        "a",
+        "s",
+        "i",
+        "f",
+        "i",
+        "c",
+        "a",
+        "c",
+        "i",
+        "ó",
+        "n",
+        " ",
+        "d",
+        "e",
+        " ",
+        "l",
+        "l",
+        "a",
+        "m",
+        "a",
+        "d",
+        "a",
+        "s",
+        " ",
+        "d",
+        "e",
+        " ",
+        "e",
+        "m",
+        "e",
+        "r",
+        "g",
+        "e",
+        "n",
+        "c",
+        "i",
+        "a",
+        " ",
+        "e",
+        "n",
+        " ",
+        "e",
+        "s",
+        "p",
+        "a",
+        "ñ",
+        "o",
+        "l",
+        " ",
+        "c",
+        "o",
+        "l",
+        "o",
+        "q",
+        "u",
+        "i",
+        "a",
+        "l"
+      ],
+      proyectos: [{ nombre: "Hackaton-Concienc.ia-2026", desc: "Prototipo de NLP con API en FastAPI e interfaz en Streamlit.", url: "https://github.com/jessicaromero-ctrl/Hackaton-Concienc.ia-2026", estado: "PROTOTIPO" }]
+    },
+    {
+      id: "neu", nombre: "Defectos en acero (NEU)", nivel: "ML · VISIÓN ARTIFICIAL",
+      cualidades: [
+        "L",
+        "B",
+        "P",
+        " ",
+        "+",
+        " ",
+        "S",
+        "V",
+        "M",
+        " ",
+        "f",
+        "r",
+        "e",
+        "n",
+        "t",
+        "e",
+        " ",
+        "a",
+        " ",
+        "R",
+        "e",
+        "s",
+        "N",
+        "e",
+        "t",
+        "-",
+        "1",
+        "8",
+        " ",
+        "c",
+        "o",
+        "n",
+        " ",
+        "t",
+        "r",
+        "a",
+        "n",
+        "s",
+        "f",
+        "e",
+        "r",
+        " ",
+        "l",
+        "e",
+        "a",
+        "r",
+        "n",
+        "i",
+        "n",
+        "g"
+      ],
+      proyectos: [{ nombre: "Defectos superficiales en acero (NEU)", desc: "Comparación clásico vs. CNN con IC por bootstrap y prueba de McNemar.", url: "https://github.com/jessicaromero-ctrl/Artificial-Vision-System-s/tree/main/04-defectos-neu", estado: "COMPLETADO" }]
+    },
+    {
+      id: "hojas", nombre: "Segmentación de hojas", nivel: "PDI · VISIÓN ARTIFICIAL",
+      cualidades: [
+        "C",
+        "r",
+        "o",
+        "m",
+        "a",
+        " ",
+        "e",
+        "n",
+        " ",
+        "L",
+        "a",
+        "b",
+        ",",
+        " ",
+        "O",
+        "t",
+        "s",
+        "u",
+        " ",
+        "y",
+        " ",
+        "a",
+        "n",
+        "á",
+        "l",
+        "i",
+        "s",
+        "i",
+        "s",
+        " ",
+        "d",
+        "e",
+        " ",
+        "s",
+        "e",
+        "n",
+        "s",
+        "i",
+        "b",
+        "i",
+        "l",
+        "i",
+        "d",
+        "a",
+        "d"
+      ],
+      proyectos: [{ nombre: "Segmentación de hojas de tomate", desc: "Segmentación de PVC1 y PVC2 con PDI clásico.", url: "https://github.com/jessicaromero-ctrl/Artificial-Vision-System-s/tree/main/05-segmentacion-hojas", estado: "COMPLETADO" }]
+    }
+  ];
+
+  (() => {
+    const reducir = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const lienzo = document.getElementById("mapa-canvas");
+    const ctx = lienzo.getContext("2d");
+    const panel = document.getElementById("mapa-panel");
+    const botones = document.getElementById("mapa-botones");
+    let w = 0, h = 0, dpr = 1, radio = 0;
+    let rx = -0.25, ry = 0, arrastrando = false, ultimo = null, movido = 0;
+    let seleccionado = 0, sobre = -1, ultimoPn = [];
+
+    const PHI = Math.PI * (3 - Math.sqrt(5));
+    const esfera = (n) => Array.from({ length: n }, (_, i) => {
+      const y = 1 - (2 * (i + 0.5)) / n;
+      const r = Math.sqrt(1 - y * y);
+      const t = PHI * i;
+      return { x: Math.cos(t) * r, y: y, z: Math.sin(t) * r };
+    });
+    const particulas = esfera(900);
+    const puntosNodos = esfera(capacidades.length);
+    const nodos = capacidades.map((c, i) => ({ ...puntosNodos[i], c }));
+
+    const proyectar = (p) => {
+      const cy = Math.cos(ry), sy = Math.sin(ry);
+      const x = p.x * cy + p.z * sy;
+      let z = -p.x * sy + p.z * cy;
+      const cx = Math.cos(rx), sx = Math.sin(rx);
+      const y = p.y * cx - z * sx;
+      z = p.y * sx + z * cx;
+      const f = 1 / (1.8 - z * 0.35);
+      return { sx: w / 2 + x * radio * f, sy: h / 2 + y * radio * f, z, f };
+    };
+
+    const ajustar = () => {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const r = lienzo.getBoundingClientRect();
+      w = r.width; h = r.height;
+      lienzo.width = w * dpr; lienzo.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      radio = w < 520 ? Math.min(w * 0.3, h * 0.3) : Math.min(w, h) * 0.36;
+    };
+
+    const dibujar = (t) => {
+      ctx.clearRect(0, 0, w, h);
+      particulas.forEach((p) => {
+        const q = proyectar(p);
+        const a = 0.25 + 0.6 * (q.z + 1) / 2;
+        ctx.fillStyle = `rgba(57,255,122,${a * 0.9})`;
+        ctx.beginPath(); ctx.arc(q.sx, q.sy, 1.1 * q.f, 0, Math.PI * 2); ctx.fill();
+      });
+      const pn = nodos.map((n) => ({ ...proyectar(n), c: n.c }));
+      pn.forEach((a, i) => {
+        const b = pn[(i + 1) % pn.length];
+        ctx.strokeStyle = "rgba(57,255,122,0.18)"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.stroke();
+      });
+      pn.forEach((q, i) => {
+        const activo = i === seleccionado, encima = i === sobre;
+        const r = (activo ? 9 : encima ? 8 : 6) * q.f;
+        ctx.globalAlpha = 0.35 + 0.65 * (q.z + 1) / 2;
+        ctx.strokeStyle = "#39ff7a"; ctx.lineWidth = activo ? 2 : 1.2;
+        ctx.beginPath(); ctx.arc(q.sx, q.sy, r, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = activo ? "#39ff7a" : "rgba(201,255,217,0.9)";
+        ctx.beginPath(); ctx.arc(q.sx, q.sy, activo ? 3 : 2, 0, Math.PI * 2); ctx.fill();
+        if (activo) {
+          ctx.strokeStyle = "rgba(57,255,122,0.35)"; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.arc(q.sx, q.sy, r + 7 + Math.sin(t * 3) * 2, 0, Math.PI * 2); ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        ctx.font = `${activo ? 600 : 500} ${activo ? 13 : 12}px Menlo, Consolas, "Courier New", monospace`;
+        ctx.fillStyle = activo ? "#eafff0" : "rgba(201,255,217,0.75)";
+        const txt = q.c.nombre.toUpperCase();
+        const ancho = ctx.measureText(txt).width;
+        let derecha = q.sx > w / 2;
+        if (derecha && q.sx + 14 + ancho > w - 6) derecha = false;
+        if (!derecha && q.sx - 14 - ancho < 6) derecha = true;
+        ctx.textAlign = derecha ? "left" : "right";
+        if (w >= 520 || activo) ctx.fillText(txt, q.sx + (derecha ? 14 : -14), q.sy + 4);
+      });
+      return pn;
+    };
+
+    const bucle = (ts) => {
+      if (!arrastrando && !reducir) ry += 0.0025;
+      ultimoPn = dibujar(ts / 1000);
+      requestAnimationFrame(bucle);
+    };
+
+    const mostrar = (i) => {
+      seleccionado = i;
+      const c = capacidades[i];
+      const proyectos = c.proyectos.length
+        ? c.proyectos.map((p) => p.url
+            ? `<a class="proyecto" href="${p.url}" target="_blank" rel="noopener"><span class="pe">${p.estado}</span><div class="pn">${p.nombre}</div><div class="pd">${p.desc}</div></a>`
+            : `<div class="proyecto pendiente"><span class="pe">${p.estado}</span><div class="pn">${p.nombre}</div><div class="pd">${p.desc}</div></div>`
+          ).join("")
+        : `<p class="pd" style="color:var(--txt);opacity:.8">Experiencia profesional; sin repositorio público.</p>`;
+      panel.innerHTML = `
+        <div class="nivel">${c.nivel}</div>
+        <h3>${c.nombre}</h3>
+        <ul class="cualidades">${c.cualidades.map((q) => `<li>${q}</li>`).join("")}</ul>
+        <div class="etq-sec">PROYECTOS</div>
+        ${proyectos}`;
+      [...botones.children].forEach((b, k) => b.setAttribute("aria-pressed", k === i ? "true" : "false"));
+    };
+
+    capacidades.forEach((c, i) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = c.nombre;
+      b.setAttribute("aria-pressed", i === 0 ? "true" : "false");
+      b.addEventListener("click", () => mostrar(i));
+      botones.appendChild(b);
+    });
+
+    const posicion = (e) => {
+      const r = lienzo.getBoundingClientRect();
+      return { x: e.clientX - r.left, y: e.clientY - r.top };
+    };
+    const nodoCercano = (x, y) => {
+      let mejor = -1, dist = 22;
+      ultimoPn.forEach((q, i) => {
+        const d = Math.hypot(q.sx - x, q.sy - y);
+        if (d < dist) { dist = d; mejor = i; }
+      });
+      return mejor;
+    };
+
+    lienzo.addEventListener("pointerdown", (e) => {
+      arrastrando = true; movido = 0; ultimo = { x: e.clientX, y: e.clientY };
+      lienzo.classList.add("arrastrando"); lienzo.setPointerCapture(e.pointerId);
+    });
+    lienzo.addEventListener("pointermove", (e) => {
+      if (arrastrando && ultimo) {
+        const dx = e.clientX - ultimo.x, dy = e.clientY - ultimo.y;
+        ry += dx * 0.006;
+        rx = Math.max(-1.2, Math.min(1.2, rx + dy * 0.006));
+        movido += Math.abs(dx) + Math.abs(dy);
+        ultimo = { x: e.clientX, y: e.clientY };
+      } else {
+        const p = posicion(e);
+        sobre = nodoCercano(p.x, p.y);
+        lienzo.style.cursor = sobre >= 0 ? "pointer" : "grab";
+      }
+    });
+    const soltar = (e) => {
+      if (arrastrando && movido < 6) {
+        const p = posicion(e);
+        const i = nodoCercano(p.x, p.y);
+        if (i >= 0) mostrar(i);
+      }
+      arrastrando = false; ultimo = null; lienzo.classList.remove("arrastrando");
+    };
+    lienzo.addEventListener("pointerup", soltar);
+    lienzo.addEventListener("pointercancel", () => { arrastrando = false; ultimo = null; lienzo.classList.remove("arrastrando"); });
+    lienzo.addEventListener("pointerleave", () => { sobre = -1; });
+
+    window.addEventListener("resize", ajustar);
+    ajustar();
+    mostrar(0);
+    requestAnimationFrame(bucle);
+  })();
 </script>
 </body>
 </html>
